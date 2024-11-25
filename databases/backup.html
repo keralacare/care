@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pluggable Apps" href="../pluggable-apps/configuration.html" /><link rel="prev" title="Working Components" href="../working-components/configuration.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Environment Variables - Care documentation</title>
+        <title>Docker database backup - Care documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -199,11 +199,11 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../local-setup/configuration.html">Setting up development environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pycharm/configuration.html">Debugging with Pycharm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../working-components/configuration.html">Working Components</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Environment Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../django-configuration/configuration.html">Environment Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pluggable-apps/configuration.html">Pluggable Apps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../django-commands/configuration.html">Django Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../github-repo/configuration.html">GitHub Repository</a></li>
@@ -230,7 +230,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/django-configuration/configuration.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/databases/backup.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -250,38 +250,107 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="environment-variables">
-<h1>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading">¶</a></h1>
-<section id="min-encounter-date">
-<h2><code class="docutils literal notranslate"><span class="pre">MIN_ENCOUNTER_DATE</span></code><a class="headerlink" href="#min-encounter-date" title="Link to this heading">¶</a></h2>
-<p>Default value is <cite>2020-01-01</cite>. This is the minimum date for a possible consultation encounter.
-Example: <cite>MIN_ENCOUNTER_DATE=2000-01-01</cite></p>
+          <section id="docker-database-backup">
+<h1>Docker database backup<a class="headerlink" href="#docker-database-backup" title="Link to this heading">¶</a></h1>
+<p>This page explains how to automate the backup process of a Docker database on a daily basis and restore the backup snapshot created by the <a class="reference external" href="../../scripts/backup.sh">backup script</a>.</p>
+<blockquote>
+<div><p>Note: This documentation assumes that you are using a Linux-based system.</p>
+</div></blockquote>
+<hr class="docutils" />
+<section id="here-s-how-the-script-works">
+<h2>Here’s how the script works<a class="headerlink" href="#here-s-how-the-script-works" title="Link to this heading">¶</a></h2>
+<p>The script automates the process of creating PostgreSQL database backups from a Docker container. It generates a backup file(<code class="docutils literal notranslate"><span class="pre">.dump</span></code>) using the pg_dump utility in PostgreSQL and stores these files in the path configured in  <code class="docutils literal notranslate"><span class="pre">$BACKUP_DIR</span></code> environment variable which is binded to <code class="docutils literal notranslate"><span class="pre">/backups</span></code> in the docker container. Backup files older than <code class="docutils literal notranslate"><span class="pre">$DB_BACKUP_RETENTION_PERIOD</span></code> days are deleted when the script is executed by default it is set to 7 days. The backup file is saved with the name <code class="docutils literal notranslate"><span class="pre">care_backup_%Y%m%d%H%M%S.sql</span></code>.</p>
 </section>
-<section id="task-summarize-triage">
-<h2><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_TRIAGE</span></code><a class="headerlink" href="#task-summarize-triage" title="Link to this heading">¶</a></h2>
-<p>Default value is <cite>True</cite>. If set to <cite>False</cite>, the celery task to summarize triage data will not be executed.
-Example: <cite>TASK_SUMMARIZE_TRIAGE=False</cite></p>
+<section id="set-up-a-cronjob">
+<h2>Set up a cronjob<a class="headerlink" href="#set-up-a-cronjob" title="Link to this heading">¶</a></h2>
+<p>Backup your database running on docker automatically everyday by initiating a cronjob.</p>
+<section id="install-the-package">
+<h3>Install the package<a class="headerlink" href="#install-the-package" title="Link to this heading">¶</a></h3>
+<p>For a fedora based system:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>crond
+</pre></div>
+</div>
+<p>For a debian based system:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>cron
+</pre></div>
+</div>
 </section>
-<section id="task-summarize-tests">
-<h2><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_TESTS</span></code><a class="headerlink" href="#task-summarize-tests" title="Link to this heading">¶</a></h2>
-<p>Default value is <cite>True</cite>. If set to <cite>False</cite>, the celery task to summarize test data will not be executed.
-Example: <cite>TASK_SUMMARIZE_TESTS=False</cite></p>
+<section id="automate-the-cronjob">
+<h3>Automate the cronjob<a class="headerlink" href="#automate-the-cronjob" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>Note: Make sure you are inside the care directory at the time of executing the following.</p>
+</div></blockquote>
+<hr class="docutils" />
+<p>Open up a crontab:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>crontab<span class="w"> </span>-e
+</pre></div>
+</div>
+<p>Add the cronjob:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">0</span><span class="w"> </span><span class="m">0</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span><span class="s2">&quot;/scripts/backup.sh&quot;</span>
+</pre></div>
+</div>
 </section>
-<section id="task-summarize-facility-capacity">
-<h2><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_FACILITY_CAPACITY</span></code><a class="headerlink" href="#task-summarize-facility-capacity" title="Link to this heading">¶</a></h2>
-<p>Default value is <cite>True</cite>. If set to <cite>False</cite>, the celery task to summarize facility capacity data will not be executed.
-Example: <cite>TASK_SUMMARIZE_FACILITY_CAPACITY=False</cite></p>
+<section id="list-the-cron-jobs">
+<h3>List the cron jobs<a class="headerlink" href="#list-the-cron-jobs" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>crontab<span class="w"> </span>-l
+</pre></div>
+</div>
 </section>
-<section id="task-summarize-patient">
-<h2><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_PATIENT</span></code><a class="headerlink" href="#task-summarize-patient" title="Link to this heading">¶</a></h2>
-<p>Default value is <cite>True</cite>. If set to <cite>False</cite>, the celery task to summarize patient data will not be executed.
-Example: <cite>TASK_SUMMARIZE_PATIENT=False</cite></p>
+<section id="check-the-status-of-cron">
+<h3>Check the status of cron<a class="headerlink" href="#check-the-status-of-cron" title="Link to this heading">¶</a></h3>
+<p>For a fedora based os:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>crond
+</pre></div>
+</div>
+<p>For a debian based os:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>cron
+</pre></div>
+</div>
 </section>
-<section id="task-summarize-district-patient">
-<h2><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_DISTRICT_PATIENT</span></code><a class="headerlink" href="#task-summarize-district-patient" title="Link to this heading">¶</a></h2>
-<p>Default value is <cite>True</cite>. If set to <cite>False</cite>, the celery task to summarize district patient data will not be executed.
-Example: <cite>TASK_SUMMARIZE_DISTRICT_PATIENT=False</cite></p>
+<section id="verify-the-cron-job">
+<h3>Verify the cron job<a class="headerlink" href="#verify-the-cron-job" title="Link to this heading">¶</a></h3>
+<p>To verify the cron job is working:</p>
+<ol class="arabic">
+<li><p>Check the system logs for cron activity, which is usually somewhere in</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/var/log/
+</pre></div>
+</div>
+</li>
+<li><p>Monitor the backup directory for new files after the scheduled time</p></li>
+</ol>
 </section>
+</section>
+</section>
+<section id="restoration-of-the-database">
+<h1>Restoration of the Database<a class="headerlink" href="#restoration-of-the-database" title="Link to this heading">¶</a></h1>
+<p>We are basically deleting the container’s existing database and creating a new database with the same name. Then we will use <code class="docutils literal notranslate"><span class="pre">pg_restore</span></code> to restore the database. Run the following commands in your terminal.</p>
+<blockquote>
+<div><p>Make sure you have stopped all the containers except the db before proceeding. And be inside the care directory at the time of executing the following.</p>
+</div></blockquote>
+<hr class="docutils" />
+<p>Delete the existing database:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span><span class="k">$(</span>docker<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;{{.Names}}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39;care-db&#39;</span><span class="k">)</span><span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;DROP DATABASE IF EXISTS care;&quot;</span>
+</pre></div>
+</div>
+<p>Create the new database:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span><span class="k">$(</span>docker<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;{{.Names}}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39;care-db&#39;</span><span class="k">)</span><span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;CREATE DATABASE care;&quot;</span>
+</pre></div>
+</div>
+<p>Execute and copy the name of the file you want to restore the database with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>ls<span class="w"> </span>./care-backups
+</pre></div>
+</div>
+<p>Restore the database:</p>
+<blockquote>
+<div><p>Replace &lt;file name&gt; with your file name which looks like this <code class="docutils literal notranslate"><span class="pre">care_backup_%Y%m%d%H%M%S.sql</span></code></p>
+</div></blockquote>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span><span class="k">$(</span>docker<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;{{.Names}}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39;care-db&#39;</span><span class="k">)</span><span class="w"> </span>pg_restore<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>care<span class="w"> </span>/backups/&lt;file<span class="w"> </span>name&gt;.dump
+</pre></div>
+</div>
+<hr class="docutils" />
+<blockquote>
+<div><p>There are way easier ways to do this. If anyone has any particular idea, feel free to make a PR :)</p>
+</div></blockquote>
 </section>
 
         </article>
@@ -289,26 +358,8 @@ Example: <cite>TASK_SUMMARIZE_DISTRICT_PATIENT=False</cite></p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../pluggable-apps/configuration.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Pluggable Apps</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="../working-components/configuration.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Working Components</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -339,15 +390,19 @@ Example: <cite>TASK_SUMMARIZE_DISTRICT_PATIENT=False</cite></p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Environment Variables</a><ul>
-<li><a class="reference internal" href="#min-encounter-date"><code class="docutils literal notranslate"><span class="pre">MIN_ENCOUNTER_DATE</span></code></a></li>
-<li><a class="reference internal" href="#task-summarize-triage"><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_TRIAGE</span></code></a></li>
-<li><a class="reference internal" href="#task-summarize-tests"><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_TESTS</span></code></a></li>
-<li><a class="reference internal" href="#task-summarize-facility-capacity"><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_FACILITY_CAPACITY</span></code></a></li>
-<li><a class="reference internal" href="#task-summarize-patient"><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_PATIENT</span></code></a></li>
-<li><a class="reference internal" href="#task-summarize-district-patient"><code class="docutils literal notranslate"><span class="pre">TASK_SUMMARIZE_DISTRICT_PATIENT</span></code></a></li>
+<li><a class="reference internal" href="#">Docker database backup</a><ul>
+<li><a class="reference internal" href="#here-s-how-the-script-works">Here’s how the script works</a></li>
+<li><a class="reference internal" href="#set-up-a-cronjob">Set up a cronjob</a><ul>
+<li><a class="reference internal" href="#install-the-package">Install the package</a></li>
+<li><a class="reference internal" href="#automate-the-cronjob">Automate the cronjob</a></li>
+<li><a class="reference internal" href="#list-the-cron-jobs">List the cron jobs</a></li>
+<li><a class="reference internal" href="#check-the-status-of-cron">Check the status of cron</a></li>
+<li><a class="reference internal" href="#verify-the-cron-job">Verify the cron job</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a class="reference internal" href="#restoration-of-the-database">Restoration of the Database</a></li>
 </ul>
 
           </div>
