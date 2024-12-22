@@ -424,7 +424,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = 1800
 # Maintenance Mode
 # ------------------------------------------------------------------------------
 # https://github.com/fabiocaccamo/django-maintenance-mode/tree/main#configuration-optional
-MAINTENANCE_MODE = int(env("MAINTENANCE_MODE", default="0"))
+MAINTENANCE_MODE_STATE_BACKEND = "maintenance_mode.backends.CacheBackend"
 
 #  Password Reset
 # ------------------------------------------------------------------------------
