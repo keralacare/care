@@ -17,6 +17,7 @@ from care.facility.models.patient_base import NewDischargeReasonEnum, Suggestion
 from care.facility.models.patient_consultation import (
     CATEGORY_CHOICES,
     PatientConsultation,
+    RouteToFacility,
 )
 from care.utils.tests.test_utils import TestUtils
 
@@ -39,7 +40,7 @@ class TestPatientConsultation(TestUtils, APITestCase):
 
     def get_default_data(self):
         return {
-            "route_to_facility": 10,
+            "route_to_facility": RouteToFacility.OUTPATIENT,
             "category": CATEGORY_CHOICES[0][0],
             "examination_details": "examination_details",
             "history_of_present_illness": "history_of_present_illness",
@@ -73,7 +74,7 @@ class TestPatientConsultation(TestUtils, APITestCase):
         return "/api/v1/consultation/"
 
     def create_route_to_facility_consultation(
-        self, patient=None, route_to_facility=10, **kwargs
+        self, patient=None, route_to_facility=RouteToFacility.OUTPATIENT, **kwargs
     ):
         patient = patient or self.create_patient(self.district, self.facility)
         data = self.get_default_data().copy()
@@ -361,36 +362,43 @@ class TestPatientConsultation(TestUtils, APITestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_route_to_facility_referred_from_facility_empty(self):
-        res = self.create_route_to_facility_consultation(route_to_facility=20)
+        res = self.create_route_to_facility_consultation(
+            route_to_facility=RouteToFacility.HOSPITAL_TRANSFER
+        )
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_route_to_facility_referred_from_facility_external(self):
         res = self.create_route_to_facility_consultation(
-            route_to_facility=20, referred_from_facility_external="Test"
+            route_to_facility=RouteToFacility.HOSPITAL_TRANSFER,
+            referred_from_facility_external="Test",
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
     def test_route_to_facility_referred_from_facility(self):
         res = self.create_route_to_facility_consultation(
-            route_to_facility=20, referred_from_facility=self.facility.external_id
+            route_to_facility=RouteToFacility.HOSPITAL_TRANSFER,
+            referred_from_facility=self.facility.external_id,
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
     def test_route_to_facility_referred_from_facility_and_external_together(self):
         res = self.create_route_to_facility_consultation(
-            route_to_facility=20,
+            route_to_facility=RouteToFacility.HOSPITAL_TRANSFER,
             referred_from_facility="123",
             referred_from_facility_external="Test",
         )
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_route_to_facility_transfer_within_facility_empty(self):
-        res = self.create_route_to_facility_consultation(route_to_facility=30)
+        res = self.create_route_to_facility_consultation(
+            route_to_facility=RouteToFacility.HOSPITAL_TRANSFER
+        )
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_route_to_facility_transfer_within_facility(self):
         res = self.create_route_to_facility_consultation(
-            route_to_facility=30, transferred_from_location=self.location.external_id
+            route_to_facility=RouteToFacility.HOSPITAL_TRANSFER,
+            transferred_from_location=self.location.external_id,
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 

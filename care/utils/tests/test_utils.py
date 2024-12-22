@@ -50,6 +50,7 @@ from care.facility.models.patient_consultation import (
     ConsentType,
     PatientCodeStatusType,
     PatientConsent,
+    RouteToFacility,
 )
 from care.users.models import District, State
 
@@ -351,7 +352,7 @@ class TestUtils:
             "consultation_notes": "",
             "course_in_facility": "",
             "patient_no": int(now().timestamp() * 1000),
-            "route_to_facility": 10,
+            "route_to_facility": RouteToFacility.OUTPATIENT,
         }
 
     @classmethod

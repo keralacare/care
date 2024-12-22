@@ -24,12 +24,16 @@ from care.utils.tests.test_utils import TestUtils
 def compare_images(image1_path: Path, image2_path: Path) -> bool:
     with Image.open(image1_path) as img1, Image.open(image2_path) as img2:
         if img1.mode != img2.mode or img1.size != img2.size:
-            return False
+            msg = f"Images differ in size or mode {image1_path} {image2_path}"
+            raise ValueError(msg)
 
         img1_hash = hashlib.sha256(img1.tobytes()).hexdigest()
         img2_hash = hashlib.sha256(img2.tobytes()).hexdigest()
 
-    return img1_hash == img2_hash
+    if img1_hash == img2_hash:
+        return True
+    msg = f"Images differ in content {image1_path} {image2_path}"
+    raise ValueError(msg)
 
 
 def test_compile_typ(data) -> bool:
