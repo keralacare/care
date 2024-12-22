@@ -36,9 +36,11 @@ from care.facility.models.patient_base import (
     DISEASE_STATUS_CHOICES,
     REVERSE_CATEGORY_CHOICES,
     REVERSE_NEW_DISCHARGE_REASON_CHOICES,
-    REVERSE_ROUTE_TO_FACILITY_CHOICES,
 )
-from care.facility.models.patient_consultation import PatientConsultation
+from care.facility.models.patient_consultation import (
+    REVERSE_ROUTE_TO_FACILITY_CHOICES,
+    PatientConsultation,
+)
 from care.facility.static_data.icd11 import get_icd11_diagnoses_objects_by_ids
 from care.users.models import GENDER_CHOICES, REVERSE_GENDER_CHOICES, User
 from care.utils.models.base import BaseManager, BaseModel

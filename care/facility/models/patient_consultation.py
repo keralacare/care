@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from care.facility.models import (
     CATEGORY_CHOICES,
@@ -18,7 +19,6 @@ from care.facility.models.patient_base import (
     NEW_DISCHARGE_REASON_CHOICES,
     REVERSE_CATEGORY_CHOICES,
     REVERSE_COVID_CATEGORY_CHOICES,
-    RouteToFacility,
     SuggestionChoices,
     reverse_choices,
 )
@@ -32,6 +32,22 @@ class ConsentType(models.IntegerChoices):
     CONSENT_FOR_PROCEDURE = 3, "Consent for Procedure"
     HIGH_RISK_CONSENT = 4, "High Risk Consent"
     OTHERS = 5, "Others"
+
+
+class RouteToFacility(models.TextChoices):
+    HOSPITAL_TRANSFER = "hosp-trans", _("Transferred from other hospital/location")
+    EMERGENCY = "emd", _("From accident/emergency department")
+    OUTPATIENT = "outp", _("From outpatient department")
+    BORN = "born", _("Born in hospital")
+    GP_REFERRAL = "gp", _("General Practitioner referral")
+    SPECIALIST_REFERRAL = "mp", _("Medical Practitioner/physician referral")
+    NURSING_HOME = "nursing", _("From nursing home")
+    PSYCHIATRIC = "psych", _("From psychiatric hospital")
+    REHABILITATION = "rehab", _("From rehabilitation facility")
+    OTHER = "other", _("Other")
+
+
+REVERSE_ROUTE_TO_FACILITY_CHOICES = reverse_choices(RouteToFacility.choices)
 
 
 class PatientConsultation(PatientBaseModel, ConsultationRelatedPermissionMixin):
@@ -83,9 +99,13 @@ class PatientConsultation(PatientBaseModel, ConsultationRelatedPermissionMixin):
     investigation = JSONField(default=list)
     procedure = JSONField(default=dict)
     suggestion = models.CharField(max_length=4, choices=SUGGESTION_CHOICES)
-    route_to_facility = models.SmallIntegerField(
-        choices=RouteToFacility, blank=True, null=True
+    deprecated_route_to_facility = models.SmallIntegerField(
+        blank=True, null=True
+    )  # Deprecated
+    route_to_facility = models.CharField(
+        max_length=10, choices=RouteToFacility.choices, null=False, blank=False
     )
+    route_to_facility_description = models.TextField(default="", null=True, blank=True)
     review_interval = models.IntegerField(default=-1)
     referred_to = models.ForeignKey(
         "Facility",

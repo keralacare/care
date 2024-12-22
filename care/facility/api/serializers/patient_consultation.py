@@ -47,7 +47,6 @@ from care.facility.models.icd11_diagnosis import (
 from care.facility.models.notification import Notification
 from care.facility.models.patient_base import (
     NewDischargeReasonEnum,
-    RouteToFacility,
     SuggestionChoices,
 )
 from care.facility.models.patient_consultation import (
@@ -55,6 +54,7 @@ from care.facility.models.patient_consultation import (
     PatientCodeStatusType,
     PatientConsent,
     PatientConsultation,
+    RouteToFacility,
 )
 from care.users.api.serializers.user import (
     UserAssignedSerializer,
@@ -82,6 +82,10 @@ class PatientConsultationSerializer(serializers.ModelSerializer):
         choices=COVID_CATEGORY_CHOICES, required=False
     )
     category = ChoiceField(choices=CATEGORY_CHOICES, required=True)
+
+    route_to_facility = serializers.ChoiceField(
+        choices=RouteToFacility.choices, required=True
+    )
 
     referred_to_object = FacilityBasicInfoSerializer(
         source="referred_to", read_only=True
@@ -292,42 +296,47 @@ class PatientConsultationSerializer(serializers.ModelSerializer):
         return consultation
 
     def create(self, validated_data):  # noqa: PLR0915 PLR0912
-        if route_to_facility := validated_data.get("route_to_facility"):
-            if route_to_facility == RouteToFacility.OUTPATIENT:
-                validated_data["icu_admission_date"] = None
-                validated_data["transferred_from_location"] = None
-                validated_data["referred_from_facility"] = None
-                validated_data["referred_from_facility_external"] = ""
-                validated_data["referred_by_external"] = ""
+        route_to_facility = validated_data.get("route_to_facility")
+        if route_to_facility == RouteToFacility.OUTPATIENT:
+            validated_data["icu_admission_date"] = None
+            validated_data["transferred_from_location"] = None
+            validated_data["referred_from_facility"] = None
+            validated_data["referred_from_facility_external"] = ""
+            validated_data["referred_by_external"] = ""
 
-            if route_to_facility == RouteToFacility.INTRA_FACILITY_TRANSFER:
-                validated_data["referred_from_facility"] = None
-                validated_data["referred_from_facility_external"] = ""
-                validated_data["referred_by_external"] = ""
-
-                if not validated_data.get("transferred_from_location"):
-                    raise ValidationError(
-                        {
-                            "transferred_from_location": [
-                                "This field is required as the patient has been transferred from another location."
-                            ]
-                        }
-                    )
-
-            if route_to_facility == RouteToFacility.INTER_FACILITY_TRANSFER:
-                validated_data["transferred_from_location"] = None
-
-                if not validated_data.get(
-                    "referred_from_facility"
-                ) and not validated_data.get("referred_from_facility_external"):
+        if route_to_facility == RouteToFacility.HOSPITAL_TRANSFER:
+            # INTRA_FACILITY_TRANSFER
+            if validated_data.get("transferred_from_location"):
+                if (
+                    validated_data.get("referred_from_facility")
+                    or validated_data.get("referred_from_facility_external")
+                    or validated_data.get("referred_by_external")
+                ):
                     raise ValidationError(
                         {
                             "referred_from_facility": [
-                                "This field is required as the patient has been referred from another facility."
+                                "This field should not be set as the patient has been transferred from another location."
+                            ],
+                            "referred_from_facility_external": [
+                                "This field should not be set as the patient has been transferred from another location."
+                            ],
+                            "referred_by_external": [
+                                "This field should not be set as the patient has been transferred from another location."
+                            ],
+                        }
+                    )
+            # INTER_FACILITY_TRANSFER
+            elif validated_data.get("referred_from_facility") or validated_data.get(
+                "referred_from_facility_external"
+            ):
+                if validated_data.get("transferred_from_location"):
+                    raise ValidationError(
+                        {
+                            "transferred_from_location": [
+                                "This field should not be set as the patient has been referred from another facility."
                             ]
                         }
                     )
-
                 if validated_data.get("referred_from_facility") and validated_data.get(
                     "referred_from_facility_external"
                 ):
@@ -341,8 +350,20 @@ class PatientConsultationSerializer(serializers.ModelSerializer):
                             ],
                         }
                     )
-        else:
-            raise ValidationError({"route_to_facility": "This field is required"})
+            else:
+                raise ValidationError(
+                    {
+                        "transferred_from_location": [
+                            "This field is required as the patient has been transferred from another location."
+                        ],
+                        "referred_from_facility": [
+                            "This field is required as the patient has been referred from another facility."
+                        ],
+                        "referred_from_facility_external": [
+                            "This field is required as the patient has been referred from another facility."
+                        ],
+                    }
+                )
 
         create_diagnosis = validated_data.pop("create_diagnoses", [])
         create_symptoms = validated_data.pop("create_symptoms", [])

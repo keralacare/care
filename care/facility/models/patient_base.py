@@ -123,13 +123,6 @@ BLOOD_GROUP_CHOICES = [
 SuggestionChoices = SimpleNamespace(HI="HI", A="A", R="R", OP="OP", DC="DC", DD="DD")
 
 
-class RouteToFacility(IntegerChoices):
-    OUTPATIENT = 10, _("Outpatient/Emergency Room")
-    INTER_FACILITY_TRANSFER = 20, _("Referred from another facility")
-    INTRA_FACILITY_TRANSFER = 30, _("Internal Transfer within the facility")
-    __empty__ = _("(Unknown)")
-
-
 class BedType(enum.Enum):
     ISOLATION = 1
     ICU = 2
@@ -147,6 +140,5 @@ REVERSE_DISEASE_STATUS_CHOICES = reverse_choices(DISEASE_STATUS_CHOICES)
 REVERSE_COVID_CATEGORY_CHOICES = reverse_choices(COVID_CATEGORY_CHOICES)  # Deprecated
 REVERSE_CATEGORY_CHOICES = reverse_choices(CATEGORY_CHOICES)
 REVERSE_BED_TYPE_CHOICES = reverse_choices(BedTypeChoices)
-REVERSE_ROUTE_TO_FACILITY_CHOICES = reverse_choices(RouteToFacility.choices)
 REVERSE_DISCHARGE_REASON_CHOICES = reverse_choices(DISCHARGE_REASON_CHOICES)
 REVERSE_NEW_DISCHARGE_REASON_CHOICES = reverse_choices(NEW_DISCHARGE_REASON_CHOICES)
