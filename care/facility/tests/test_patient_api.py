@@ -45,6 +45,7 @@ class ExpectedFacilityKeys(Enum):
     FEATURES = "features"
     PATIENT_COUNT = "patient_count"
     BED_COUNT = "bed_count"
+    DESCRIPTION = "description"
 
 
 class ExpectedWardObjectKeys(Enum):
@@ -87,6 +88,7 @@ class ExpectedCreatedByObjectKeys(Enum):
     USER_TYPE = "user_type"
     LAST_LOGIN = "last_login"
     READ_PROFILE_PICTURE_URL = "read_profile_picture_url"
+    EXTERNAL_ID = "external_id"
 
 
 class PatientNotesTestCase(TestUtils, APITestCase):
