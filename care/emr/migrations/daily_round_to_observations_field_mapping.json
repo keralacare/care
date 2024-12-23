@@ -1,0 +1,711 @@
+[
+  {
+    "value_key": "bp.systolic",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "vital-signs",
+      "display_name": "Vital Signs"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "8480-6",
+      "display_name": "BP Systolic"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "271649006",
+      "display_name": "BP Systolic"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "bp.diastolic",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "vital-signs",
+      "display_name": "Vital Signs"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "8462-4",
+      "display_name": "BP Diastolic"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "271650006",
+      "display_name": "BP Diastolic"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "ventilator_spo2",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "vital-signs",
+      "display_name": "Vital Signs"
+    },
+    "main_code": {},
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "250554003",
+      "display_name": "SpO2 (Measurement)"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "temperature",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "vital-signs",
+      "display_name": "Vital Signs"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "8329-5",
+      "display_name": "Temperature (observable entity)"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "703421000",
+      "display_name": "Temperature (observable entity)"
+    },
+    "value_type": "decimal",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "resp",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "vital-signs",
+      "display_name": "Vital Signs"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "9279-1",
+      "display_name": "Respiratory Rate"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "86290005",
+      "display_name": "Respiratory Rate"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "pain",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "38212-7",
+      "display_name": "Pain"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "406127006",
+      "display_name": "Pain"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "pulse",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "vital-signs",
+      "display_name": "Vital Signs"
+    },
+    "main_code": {},
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "364075005",
+      "display_name": "Pulse (observable entity)"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "rhythm",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "vital-signs",
+      "display_name": "Vital Signs"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "67519-9",
+      "display_name": "Rhythm (Pulse rhythm observable entity)"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "364095004",
+      "display_name": "Rhythm (Pulse rhythm observable entity)"
+    },
+    "value_type": "string",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": {},
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "consciousness_level",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "80288-4",
+      "display_name": "Level of Consciousness (observable entity)"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "6942003",
+      "display_name": "Level of Consciousness (observable entity)"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "left_pupil_size",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "exam",
+      "display_name": "Exam"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "8640-5",
+      "display_name": "Left Pupil Diameter"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "363953003",
+      "display_name": "Left Pupil Diameter"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "exam",
+      "display_name": "Exam"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "75944-9",
+      "display_name": "Left Pupil Reaction"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "271733001",
+      "display_name": "Left Pupil Reaction"
+    },
+    "value_type": "string",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "right_pupil_size",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "exam",
+      "display_name": "Exam"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "8642-1",
+      "display_name": "Right Pupil Diameter"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "363953003",
+      "display_name": "Right Pupil Diameter"
+    },
+    "value_type": "string",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "exam",
+      "display_name": "Exam"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "75945-6",
+      "display_name": "Right Pupil Reaction"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "271733001",
+      "display_name": "Right Pupil Reaction"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "glasgow_eye_open",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "9267-6",
+      "display_name": "- Eye opening response"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "281395000",
+      "display_name": "- Eye opening response"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "glasgow_verbal_response",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "9270-0",
+      "display_name": "- verbal"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "281397008",
+      "display_name": "- verbal"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "glasgow_motor_response",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "9268-4",
+      "display_name": "- motor"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "281396004",
+      "display_name": "- motor"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "etco2",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {},
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "250790007",
+      "display_name": "etco2"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "bilateral_air_entry",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {},
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "58840004",
+      "display_name": "Bilateral air entry"
+    },
+    "value_type": "boolean",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "po2",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "703-7",
+      "display_name": "po2"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "25579001",
+      "display_name": "po2"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "pco2",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "2019-8",
+      "display_name": "pco2"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "1304152003",
+      "display_name": "pco2"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "ph",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "2744-1",
+      "display_name": "ph"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "27051004",
+      "display_name": "ph"
+    },
+    "value_type": "decimal",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "hco3",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "1960-4",
+      "display_name": "HCO3"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "443685006",
+      "display_name": "HCO3"
+    },
+    "value_type": "decimal",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "base_excess",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "1925-7",
+      "display_name": "Base Excess"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "129907001",
+      "display_name": "Base Excess"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "lactate",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "30242-2",
+      "display_name": "Lactate"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "394960005",
+      "display_name": "Lactate"
+    },
+    "value_type": "decimal",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "sodium",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "32717-1",
+      "display_name": "Sodium"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "312469006",
+      "display_name": "Sodium"
+    },
+    "value_type": "decimal",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "potassium",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "32713-0",
+      "display_name": "Potassium"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "312468003",
+      "display_name": "Potassium"
+    },
+    "value_type": "decimal",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "blood_sugar_level",
+    "notes_key": "",
+    "category_code": {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "laboratory",
+      "display_name": "Laboratory"
+    },
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "2339-0",
+      "display_name": "Glucose"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "365812005",
+      "display_name": "Glucose"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "insulin_intake_dose",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {},
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "789480007",
+      "display_name": "Insulin Intake"
+    },
+    "value_type": "decimal",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "infusions",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {},
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "36576007",
+      "display_name": "Infusions"
+    },
+    "value_type": "string",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "iv_fluids",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {},
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "118431008",
+      "display_name": "IV Fluids"
+    },
+    "value_type": "string",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "feeds",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {},
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "229912004",
+      "display_name": "Feed"
+    },
+    "value_type": "string",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "dialysis_fluid_balance",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "104103-7",
+      "display_name": "Fluid Balance"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "251856003",
+      "display_name": "Fluid Balance"
+    },
+    "value_type": "integer",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  },
+  {
+    "value_key": "pressure_sore",
+    "notes_key": "",
+    "category_code": {},
+    "main_code": {
+      "system": "http://loinc.org/",
+      "code": "46535-1",
+      "display_name": "Pressure sore (Pressure injury)"
+    },
+    "alternate_coding": {
+      "system": "http://www.snomed.info/sct",
+      "code": "225393005",
+      "display_name": "Pressure sore (Pressure injury)"
+    },
+    "value_type": "string",
+    "unit_code": {},
+    "quantity_code": {},
+    "value_map": "",
+    "body_site": {},
+    "method": {}
+  }
+]
