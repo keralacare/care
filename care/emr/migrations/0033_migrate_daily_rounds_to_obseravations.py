@@ -51,6 +51,13 @@ def get_observations(field_mapping, daily_round):
         }
     }
 
+    # set nested json values as attributes on the object so that we can access them easily
+    for array_field in ("output", "nursing", "pressure_sore"):
+        for item in getattr(daily_round, array_field, []):
+            for key, value in item.items():
+                # TODO: check if we need deduplication
+                setattr(daily_round, f"{array_field}__{key.lower()}", value)
+
     for field in field_mapping:
         try:
             daily_round_value = None
