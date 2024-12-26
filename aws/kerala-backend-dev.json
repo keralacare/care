@@ -1,0 +1,244 @@
+{
+  "executionRoleArn": "arn:aws:iam::changeme:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/care-backend",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "portMappings": [
+        {
+          "containerPort": 9000,
+          "hostPort": 9000,
+          "protocol": "tcp"
+        }
+      ],
+      "command": ["./scripts/start.sh"],
+      "environment": [
+        {
+          "name": "AUDIT_LOG_ENABLED",
+          "value": "1"
+        },
+        {
+          "name": "AWS_STORAGE_BUCKET_NAME",
+          "value": "changeme"
+        },
+        {
+          "name": "CSRF_TRUSTED_ORIGINS",
+          "value": "[\"http://care-django\", \"https://care.changeme\", \"https://careapi.changeme\"]"
+        },
+        {
+          "name": "CORS_ALLOWED_ORIGINS",
+          "value": "[\"https://care.changeme\", \"https://careapi.changeme\",\"http://localhost:4000\"]"
+        },
+        {
+          "name": "CURRENT_DOMAIN",
+          "value": "https://care.changeme"
+        },
+        {
+          "name": "BACKEND_DOMAIN",
+          "value": "https://careapi.changeme"
+        },
+        {
+          "name": "DJANGO_ADMIN_URL",
+          "value": "secureme"
+        },
+        {
+          "name": "DJANGO_ALLOWED_HOSTS",
+          "value": "[\"care-djangochangeme\", \"care.changeme\", \"careapi.changeme\"]"
+        },
+        {
+          "name": "DJANGO_SECURE_SSL_REDIRECT",
+          "value": "False"
+        },
+        {
+          "name": "DJANGO_SETTINGS_MODULE",
+          "value": "config.settings.staging"
+        },
+        {
+          "name": "EMAIL_FROM",
+          "value": "<changeme>"
+        },
+        {
+          "name": "EMAIL_HOST",
+          "value": "email-smtp.ap-south-1.amazonaws.com"
+        },
+        {
+          "name": "FACILITY_S3_BUCKET",
+          "value": "changeme-facility"
+        },
+        {
+          "name": "FACILITY_S3_BUCKET_ENDPOINT",
+          "value": "https://changeme.s3.amazonaws.com"
+        },
+        {
+          "name": "FACILITY_S3_STATIC_PREFIX",
+          "value": "https://changeme.s3.ap-south-1.amazonaws.com/changeme"
+        },
+        {
+          "name": "FILE_UPLOAD_BUCKET",
+          "value": "changeme"
+        },
+        {
+          "name": "FILE_UPLOAD_BUCKET_ENDPOINT",
+          "value": "https://changeme.s3.amazonaws.com"
+        },
+        {
+          "name": "MAINTENANCE_MODE",
+          "value": "0"
+        },
+        {
+          "name": "POSTGRES_DB",
+          "value": "changeme-var.app"
+        },
+        {
+          "name": "POSTGRES_USER",
+          "value": "confirme-postgres"
+        },
+        {
+          "name": "RATE_LIMIT",
+          "value": "5/10m"
+        },
+        {
+          "name": "USE_S3",
+          "value": "True"
+        },
+        {
+          "name": "SENTRY_TRACES_SAMPLE_RATE",
+          "value": "1.0"
+        },
+        {
+          "name": "SENTRY_PROFILES_SAMPLE_RATE",
+          "value": "1.0"
+        },
+        {
+          "name": "SENTRY_ENVIRONMENT",
+          "value": "kerala-care-dev"
+        }
+      ],
+      "repositoryCredentials": {
+        "credentialsParameter": "arn:aws:secretsmanager:ap-south-1:changeme:secret:/github/pat-UHmr0B"
+      },
+      "workingDirectory": "/app",
+      "secrets": [
+        {
+          "valueFrom": "/care/backend/POSTGRES_PORT",
+          "name": "POSTGRES_PORT"
+        },
+        {
+          "valueFrom": "/care/backend/POSTGRES_HOST",
+          "name": "POSTGRES_HOST"
+        },
+        {
+          "valueFrom": "/care/backend/POSTGRES_PASSWORD",
+          "name": "POSTGRES_PASSWORD"
+        },
+        {
+          "valueFrom": "/care/backend/DATABASE_URL",
+          "name": "DATABASE_URL"
+        },
+        {
+          "valueFrom": "/care/backend/SENTRY_DSN",
+          "name": "SENTRY_DSN"
+        },
+        {
+          "valueFrom": "/care/backend/DJANGO_SECRET_KEY",
+          "name": "DJANGO_SECRET_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/AWS_ACCESS_KEY_ID",
+          "name": "AWS_ACCESS_KEY_ID"
+        },
+        {
+          "valueFrom": "/care/backend/AWS_SECRET_ACCESS_KEY",
+          "name": "AWS_SECRET_ACCESS_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/CELERY_BROKER_URL",
+          "name": "CELERY_BROKER_URL"
+        },
+        {
+          "valueFrom": "/care/backend/CELERY_BROKER_URL",
+          "name": "REDIS_URL"
+        },
+        {
+          "valueFrom": "/care/backend/EMAIL_USER",
+          "name": "EMAIL_USER"
+        },
+        {
+          "valueFrom": "/care/backend/EMAIL_PASSWORD",
+          "name": "EMAIL_PASSWORD"
+        },
+        {
+          "valueFrom": "/care/backend/SNS_ACCESS_KEY",
+          "name": "SNS_ACCESS_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/SNS_SECRET_KEY",
+          "name": "SNS_SECRET_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/FILE_UPLOAD_KEY",
+          "name": "FILE_UPLOAD_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/FILE_UPLOAD_SECRET",
+          "name": "FILE_UPLOAD_SECRET"
+        },
+        {
+          "valueFrom": "/care/backend/GOOGLE_RECAPTCHA_SITE_KEY",
+          "name": "GOOGLE_RECAPTCHA_SITE_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/GOOGLE_RECAPTCHA_SECRET_KEY",
+          "name": "GOOGLE_RECAPTCHA_SECRET_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/FACILITY_S3_KEY",
+          "name": "FACILITY_S3_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/FACILITY_S3_SECRET",
+          "name": "FACILITY_S3_SECRET"
+        },
+        {
+          "valueFrom": "/care/backend/VAPID_PUBLIC_KEY",
+          "name": "VAPID_PUBLIC_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/VAPID_PRIVATE_KEY",
+          "name": "VAPID_PRIVATE_KEY"
+        },
+        {
+          "valueFrom": "/care/backend/PLAUSIBLE_HOST",
+          "name": "PLAUSIBLE_HOST"
+        },
+        {
+          "valueFrom": "/care/backend/PLAUSIBLE_SITE_ID",
+          "name": "PLAUSIBLE_SITE_ID"
+        },
+        {
+          "valueFrom": "/care/backend/PLAUSIBLE_AUTH_TOKEN",
+          "name": "PLAUSIBLE_AUTH_TOKEN"
+        },
+        {
+          "valueFrom": "/care/backend/JWKS_BASE64",
+          "name": "JWKS_BASE64"
+        }
+      ],
+      "name": "care-backend"
+    }
+  ],
+  "memory": "1024",
+  "taskRoleArn": "arn:aws:iam::changeme:role/ecsTaskExecutionRole",
+  "family": "care",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "512",
+  "volumes": []
+}
+

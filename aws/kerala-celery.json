@@ -1,0 +1,451 @@
+{
+  "executionrolearn": "arn:aws:iam::changeme:role/ecstaskexecutionrole",
+  "containerdefinitions": [
+    {
+      "logconfiguration": {
+        "logdriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/care-celery-beat",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "portmappings": [],
+      "command": ["/app/celery_beat-ecs.sh"],
+      "cpu": 128,
+      "environment": [
+        {
+          "name": "audit_log_enabled",
+          "value": "1"
+        },
+        {
+          "name": "aws_storage_bucket_name",
+          "value": "changeme-s3-assets-changeme"
+        },
+        {
+          "name": "csrf_trusted_origins",
+          "value": "[\"http://care-django-staging\", \"https://care.changeme.in\", \"https://careapi.changeme.in\", \"https://care.changeme\", \"https://careapi.changeme\"]"
+        },
+        {
+          "name": "current_domain",
+          "value": "https://care.changeme"
+        },
+        {
+          "name": "backend_domain",
+          "value": "https://careapi.changeme"
+        },
+        {
+          "name": "django_admin_url",
+          "value": "secureme"
+        },
+        {
+          "name": "django_allowed_hosts",
+          "value": "[\"care-django-staging\", \"care.changeme.in\", \"careapi.changeme.in\", \"care.changeme\", \"careapi.changeme\"]"
+        },
+        {
+          "name": "django_secure_ssl_redirect",
+          "value": "false"
+        },
+        {
+          "name": "django_settings_module",
+          "value": "config.settings.production"
+        },
+        {
+          "name": "email_from",
+          "value": "change me<ops@care.changeme>"
+        },
+        {
+          "name": "email_host",
+          "value": "email-smtp.ap-south-1.amazonaws.com"
+        },
+        {
+          "name": "facility_s3_bucket",
+          "value": "changeme-s3-facility-changeme"
+        },
+        {
+          "name": "facility_s3_bucket_endpoint",
+          "value": "https://changeme-s3-facility-changeme.s3.amazonaws.com"
+        },
+        {
+          "name": "file_upload_bucket",
+          "value": "changeme-s3-patient-data-changeme"
+        },
+        {
+          "name": "file_upload_bucket_endpoint",
+          "value": "https://changeme-s3-patient-data-changeme.s3.amazonaws.com"
+        },
+        {
+          "name": "maintenance_mode",
+          "value": "0"
+        },
+        {
+          "name": "postgres_db",
+          "value": "changeme"
+        },
+        {
+          "name": "postgres_user",
+          "value": "postgres"
+        },
+        {
+          "name": "rate_limit",
+          "value": "5/10m"
+        },
+        {
+          "name": "use_s3",
+          "value": "true"
+        },
+        {
+          "name": "sentry_traces_sample_rate",
+          "value": "1.0"
+        },
+        {
+          "name": "sentry_profiles_sample_rate",
+          "value": "1.0"
+        },
+        {
+          "name": "sentry_environment",
+          "value": "kerala-care"
+        }
+      ],
+      "repositorycredentials": {
+        "credentialsparameter": "arn:aws:secretsmanager:ap-south-1:changeme:secret:/github/pat-uhmr0b"
+      },
+      "memory": 512,
+      "memoryreservation": 512,
+      "workingdirectory": "/app",
+      "secrets": [
+        {
+          "valuefrom": "/care/backend/postgres_port",
+          "name": "postgres_port"
+        },
+        {
+          "valuefrom": "/care/backend/postgres_host",
+          "name": "postgres_host"
+        },
+        {
+          "valuefrom": "/care/backend/postgres_password",
+          "name": "postgres_password"
+        },
+        {
+          "valuefrom": "/care/backend/database_url",
+          "name": "database_url"
+        },
+        {
+          "valuefrom": "/care/backend/sentry_dsn",
+          "name": "sentry_dsn"
+        },
+        {
+          "valuefrom": "/care/backend/django_secret_key",
+          "name": "django_secret_key"
+        },
+        {
+          "valuefrom": "/care/backend/aws_access_key_id",
+          "name": "aws_access_key_id"
+        },
+        {
+          "valuefrom": "/care/backend/aws_secret_access_key",
+          "name": "aws_secret_access_key"
+        },
+        {
+          "valuefrom": "/care/backend/celery_broker_url",
+          "name": "celery_broker_url"
+        },
+        {
+          "valuefrom": "/care/backend/celery_broker_url",
+          "name": "redis_url"
+        },
+        {
+          "valuefrom": "/care/backend/email_user",
+          "name": "email_user"
+        },
+        {
+          "valuefrom": "/care/backend/email_password",
+          "name": "email_password"
+        },
+        {
+          "valuefrom": "/care/backend/sns_access_key",
+          "name": "sns_access_key"
+        },
+        {
+          "valuefrom": "/care/backend/sns_secret_key",
+          "name": "sns_secret_key"
+        },
+        {
+          "valuefrom": "/care/backend/file_upload_key",
+          "name": "file_upload_key"
+        },
+        {
+          "valuefrom": "/care/backend/file_upload_secret",
+          "name": "file_upload_secret"
+        },
+        {
+          "valuefrom": "/care/backend/google_recaptcha_site_key",
+          "name": "google_recaptcha_site_key"
+        },
+        {
+          "valuefrom": "/care/backend/google_recaptcha_secret_key",
+          "name": "google_recaptcha_secret_key"
+        },
+        {
+          "valuefrom": "/care/backend/facility_s3_key",
+          "name": "facility_s3_key"
+        },
+        {
+          "valuefrom": "/care/backend/facility_s3_secret",
+          "name": "facility_s3_secret"
+        },
+        {
+          "valuefrom": "/care/backend/vapid_public_key",
+          "name": "vapid_public_key"
+        },
+        {
+          "valuefrom": "/care/backend/vapid_private_key",
+          "name": "vapid_private_key"
+        },
+        {
+          "valuefrom": "/care/backend/plausible_host",
+          "name": "plausible_host"
+        },
+        {
+          "valuefrom": "/care/backend/plausible_site_id",
+          "name": "plausible_site_id"
+        },
+        {
+          "valuefrom": "/care/backend/plausible_auth_token",
+          "name": "plausible_auth_token"
+        },
+        {
+          "valuefrom": "/care/backend/jwks_base64",
+          "name": "jwks_base64"
+        }
+      ],
+      "name": "care-celery-beat"
+    },
+    {
+      "logconfiguration": {
+        "logdriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/care-celery-worker",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "command": ["/app/celery_worker-ecs.sh"],
+      "cpu": 384,
+      "memory": 1536,
+      "memoryreservation": 1536,
+      "environment": [
+        {
+          "name": "audit_log_enabled",
+          "value": "1"
+        },
+        {
+          "name": "aws_storage_bucket_name",
+          "value": "changeme-s3-assets-changeme"
+        },
+        {
+          "name": "csrf_trusted_origins",
+          "value": "[\"http://care-django-staging\", \"https://care.changeme.in\", \"https://careapi.changeme.in\", \"https://care.changeme\", \"https://careapi.changeme\"]"
+        },
+        {
+          "name": "current_domain",
+          "value": "https://care.changeme"
+        },
+        {
+          "name": "backend_domain",
+          "value": "https://careapi.changeme"
+        },
+        {
+          "name": "django_admin_url",
+          "value": "secureme"
+        },
+        {
+          "name": "django_allowed_hosts",
+          "value": "[\"care-django-staging\", \"care.changeme.in\", \"careapi.changeme.in\", \"care.changeme\", \"careapi.changeme\"]"
+        },
+        {
+          "name": "django_secure_ssl_redirect",
+          "value": "false"
+        },
+        {
+          "name": "django_settings_module",
+          "value": "config.settings.production"
+        },
+        {
+          "name": "email_from",
+          "value": "change me<ops@care.changeme>"
+        },
+        {
+          "name": "email_host",
+          "value": "email-smtp.ap-south-1.amazonaws.com"
+        },
+        {
+          "name": "facility_s3_bucket",
+          "value": "changeme-s3-facility-changeme"
+        },
+        {
+          "name": "facility_s3_bucket_endpoint",
+          "value": "https://changeme-s3-facility-changeme.s3.amazonaws.com"
+        },
+        {
+          "name": "file_upload_bucket",
+          "value": "changeme-s3-patient-data-changeme"
+        },
+        {
+          "name": "file_upload_bucket_endpoint",
+          "value": "https://changeme-s3-patient-data-changeme.s3.amazonaws.com"
+        },
+        {
+          "name": "maintenance_mode",
+          "value": "0"
+        },
+        {
+          "name": "postgres_db",
+          "value": "care_staging"
+        },
+        {
+          "name": "postgres_user",
+          "value": "postgres"
+        },
+        {
+          "name": "rate_limit",
+          "value": "5/10m"
+        },
+        {
+          "name": "use_s3",
+          "value": "true"
+        },
+        {
+          "name": "sentry_traces_sample_rate",
+          "value": "1.0"
+        },
+        {
+          "name": "sentry_profiles_sample_rate",
+          "value": "1.0"
+        },
+        {
+          "name": "sentry_environment",
+          "value": "kerala-care"
+        }
+      ],
+      "repositorycredentials": {
+        "credentialsparameter": "arn:aws:secretsmanager:ap-south-1:299650323339:secret:/github/pat-uhmr0b"
+      },
+      "workingdirectory": "/app",
+      "secrets": [
+        {
+          "valuefrom": "/care/backend/postgres_port",
+          "name": "postgres_port"
+        },
+        {
+          "valuefrom": "/care/backend/postgres_host",
+          "name": "postgres_host"
+        },
+        {
+          "valuefrom": "/care/backend/postgres_password",
+          "name": "postgres_password"
+        },
+        {
+          "valuefrom": "/care/backend/database_url",
+          "name": "database_url"
+        },
+        {
+          "valuefrom": "/care/backend/sentry_dsn",
+          "name": "sentry_dsn"
+        },
+        {
+          "valuefrom": "/care/backend/django_secret_key",
+          "name": "django_secret_key"
+        },
+        {
+          "valuefrom": "/care/backend/aws_access_key_id",
+          "name": "aws_access_key_id"
+        },
+        {
+          "valuefrom": "/care/backend/aws_secret_access_key",
+          "name": "aws_secret_access_key"
+        },
+        {
+          "valuefrom": "/care/backend/celery_broker_url",
+          "name": "celery_broker_url"
+        },
+        {
+          "valuefrom": "/care/backend/celery_broker_url",
+          "name": "redis_url"
+        },
+        {
+          "valuefrom": "/care/backend/email_user",
+          "name": "email_user"
+        },
+        {
+          "valuefrom": "/care/backend/email_password",
+          "name": "email_password"
+        },
+        {
+          "valuefrom": "/care/backend/sns_access_key",
+          "name": "sns_access_key"
+        },
+        {
+          "valuefrom": "/care/backend/sns_secret_key",
+          "name": "sns_secret_key"
+        },
+        {
+          "valuefrom": "/care/backend/file_upload_key",
+          "name": "file_upload_key"
+        },
+        {
+          "valuefrom": "/care/backend/file_upload_secret",
+          "name": "file_upload_secret"
+        },
+        {
+          "valuefrom": "/care/backend/google_recaptcha_site_key",
+          "name": "google_recaptcha_site_key"
+        },
+        {
+          "valuefrom": "/care/backend/google_recaptcha_secret_key",
+          "name": "google_recaptcha_secret_key"
+        },
+        {
+          "valuefrom": "/care/backend/facility_s3_key",
+          "name": "facility_s3_key"
+        },
+        {
+          "valuefrom": "/care/backend/facility_s3_secret",
+          "name": "facility_s3_secret"
+        },
+        {
+          "valuefrom": "/care/backend/vapid_public_key",
+          "name": "vapid_public_key"
+        },
+        {
+          "valuefrom": "/care/backend/vapid_private_key",
+          "name": "vapid_private_key"
+        },
+        {
+          "valuefrom": "/care/backend/plausible_host",
+          "name": "plausible_host"
+        },
+        {
+          "valuefrom": "/care/backend/plausible_site_id",
+          "name": "plausible_site_id"
+        },
+        {
+          "valuefrom": "/care/backend/plausible_auth_token",
+          "name": "plausible_auth_token"
+        },
+        {
+          "valuefrom": "/care/backend/jwks_base64",
+          "name": "jwks_base64"
+        }
+      ],
+      "name": "care-celery-worker"
+    }
+  ],
+  "memory": "2048",
+  "taskrolearn": "arn:aws:iam::changeme:role/ecstaskexecutionrole",
+  "family": "care-celery",
+  "requirescompatibilities": ["fargate"],
+  "networkmode": "awsvpc",
+  "cpu": "512",
+  "volumes": []
+}
