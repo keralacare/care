@@ -30,8 +30,35 @@ jobs:
     with:
       event_name: ${{ github.event_name }}
 
+  validate-aws-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Validate ECS resources
+        id: validate-ecs
+        run: |
+          # Verify cluster exists
+          if ! aws ecs describe-clusters --clusters ${{ env.ECS_CLUSTER }} --query 'clusters[0].clusterArn' --output text; then
+            echo "::error::ECS Cluster ${{ env.ECS_CLUSTER }} not found in region ${{ env.AWS_DEFAULT_REGION }}"
+            exit 1
+          fi
+
+          # Verify services exist
+          for service in ${{ env.ECS_SERVICE_BACKEND }} ${{ env.ECS_SERVICE_CELERY }}; do
+            if ! aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services $service --query 'services[0].serviceArn' --output text; then
+              echo "::error::ECS Service $service not found in cluster ${{ env.ECS_CLUSTER }}"
+              exit 1
+            fi
+          done
+
   build:
-    needs: test
+    needs: [test, validate-aws-config]
     name: Build & Push to container registries
     runs-on: ubuntu-latest
     steps:
@@ -48,7 +75,7 @@ jobs:
             ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=dev-latest,enable=${{ github.ref == 'refs/heads/vigneshhari/health-details' }}
-            type=raw,value=dev-latest-${{ github.run_number }}-{{date 'YYYYMMDD'}}-{{sha}},enable=${{ github.ref == 'refs/heads/vigneshhari/health-details' }}
+            type=raw,value=dev-latest-${{ github.run_number }}-{{date 'YYYYMMDDHHmmss'}}-{{sha}},enable=${{ github.ref == 'refs/heads/vigneshhari/health-details' }}
             type=raw,value=latest,enable=${{ github.event_name == 'workflow_dispatch' }}
             type=raw,value=latest-${{ github.run_number }},enable=${{ github.event_name == 'workflow_dispatch' }}
             type=semver,pattern={{version}}
@@ -77,6 +104,7 @@ jobs:
             ${{ runner.os }}-buildx-build-
 
       - name: Build and push image
+        id: build-push
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -92,6 +120,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       - name: Create Sentry release
+        if: success() # Only create Sentry release if build succeeds
         uses: getsentry/action-release@v1
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -100,20 +129,13 @@ jobs:
         with:
           version: ${{ github.sha }}
 
-      - name: Move cache
+      - name: Update cache
+        if: always() # Run even if previous steps fail
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  notify-release:
-    needs: build
-    if: startsWith(github.event.ref, 'refs/tags/v')
-    name: Notify release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify release
-        run: |
-          echo "Release ${{ github.sha }} is ready to be deployed to production"
+          if [ -d "/tmp/.buildx-cache-new" ]; then
+            rm -rf /tmp/.buildx-cache
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          fi
 
   deploy-kerala-care-staging:
     needs: build
@@ -125,9 +147,6 @@ jobs:
       url: https://api.care.kerala.gov.in
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -135,44 +154,70 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: IMAGE Tagging
+      - name: Set Image Tag
         env:
           ECR_REGISTRY: ghcr.io/${{ github.repository }}
           IMAGE_TAG: latest-${{ github.run_number }}
-        run: echo "IMAGE_VALUE=ghcr.io/${{ github.repository }}:$IMAGE_TAG" >> $GITHUB_ENV
+        run: echo "IMAGE_VALUE=${ECR_REGISTRY}:${IMAGE_TAG}" >> $GITHUB_ENV
 
-      - name: Fetch Celery Task Definition
-        id: fetch-task-def-celery
+      - name: Update and Deploy Celery Service
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE_CELERY }} --output json > celery-task-def.json
+          # Fetch current task definition
+          TASK_DEF=$(aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE_CELERY }})
+          if [ $? -ne 0 ]; then
+            echo "Failed to fetch celery task definition"
+            exit 1
+          fi
 
-      - name: Update Celery Task Definition
-        id: update-task-def-celery
+          # Find the correct container definition index for worker
+          CONTAINER_INDEX_WORKER=$(echo $TASK_DEF | jq --arg NAME "${{ env.CONTAINER_NAME_WORKER }}" '.taskDefinition.containerDefinitions | map(.name == $NAME) | index(true)')
+          if [ "$CONTAINER_INDEX_WORKER" == "null" ]; then
+            echo "Container ${{ env.CONTAINER_NAME_WORKER }} not found in task definition"
+            exit 1
+          fi
+
+          # Find the correct container definition index for cron
+          CONTAINER_INDEX_CRON=$(echo $TASK_DEF | jq --arg NAME "${{ env.CONTAINER_NAME_CRON }}" '.taskDefinition.containerDefinitions | map(.name == $NAME) | index(true)')
+          if [ "$CONTAINER_INDEX_CRON" == "null" ]; then
+            echo "Container ${{ env.CONTAINER_NAME_CRON }} not found in task definition"
+            exit 1
+          fi
+
+          # Update the image for worker
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "ghcr.io/${{ github.repository }}:latest-${{ github.run_number }}" --arg INDEX "$CONTAINER_INDEX_WORKER" '.taskDefinition | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy) | .containerDefinitions[$INDEX | tonumber].image = $IMAGE')
+
+          # Update the image for cron
+          NEW_TASK_DEF=$(echo $NEW_TASK_DEF | jq --arg IMAGE "ghcr.io/${{ github.repository }}:latest-${{ github.run_number }}" --arg INDEX "$CONTAINER_INDEX_CRON" '.containerDefinitions[$INDEX | tonumber].image = $IMAGE')
+
+          # Register new task definition
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" --query 'taskDefinition.taskDefinitionArn' --output text)
+
+          # Update service
+          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE_CELERY }} --task-definition $NEW_TASK_DEF_ARN --force-new-deployment
+
+      - name: Update and Deploy Backend Service
         run: |
-          jq --arg IMAGE_VALUE "${{ env.IMAGE_VALUE }}" '.taskDefinition.containerDefinitions[0].image = $IMAGE_VALUE' celery-task-def.json > updated-celery-task-def.json
+          # Fetch current task definition
+          TASK_DEF=$(aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE_BACKEND }})
+          if [ $? -ne 0 ]; then
+            echo "Failed to fetch backend task definition"
+            exit 1
+          fi
 
-      - name: Deploy Backend Celery
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: updated-celery-task-def.json
-          service: ${{ env.ECS_SERVICE_CELERY }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+          CONTAINER_INDEX=$(echo $TASK_DEF | jq --arg NAME "${{ env.CONTAINER_NAME_BACKEND }}" '.taskDefinition.containerDefinitions | map(.name == $NAME) | index(true)')
+          if [ "$CONTAINER_INDEX" == "null" ]; then
+            echo "Container ${{ env.CONTAINER_NAME_BACKEND }} not found in task definition"
+            exit 1
+          fi
 
-      - name: Fetch Backend Task Definition
-        id: fetch-task-def-backend
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "${{ env.IMAGE_VALUE }}" --arg INDEX "$CONTAINER_INDEX" '.taskDefinition | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy) | .containerDefinitions[$INDEX | tonumber].image = $IMAGE')
+
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" --query 'taskDefinition.taskDefinitionArn' --output text)
+
+          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE_BACKEND }} --task-definition $NEW_TASK_DEF_ARN --force-new-deployment
+
+      - name: Wait for services stability
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE_BACKEND }} --output json > backend-task-def.json
-
-      - name: Update Backend Task Definition
-        id: update-task-def-backend
-        run: |
-          jq --arg IMAGE_VALUE "${{ env.IMAGE_VALUE }}" '.taskDefinition.containerDefinitions[0].image = $IMAGE_VALUE' backend-task-def.json > updated-backend-task-def.json
-
-      - name: Deploy Backend Api
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: updated-backend-task-def.json
-          service: ${{ env.ECS_SERVICE_BACKEND }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+          for service in ${{ env.ECS_SERVICE_BACKEND }} ${{ env.ECS_SERVICE_CELERY }}; do
+            aws ecs wait services-stable --cluster ${{ env.ECS_CLUSTER }} --services $service
+          done
