@@ -13,11 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_NAME: care
   AWS_DEFAULT_REGION: ap-south-1
   AWS_DEFAULT_OUTPUT: json
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   ECS_SERVICE_BACKEND: "care-backend"
   ECS_SERVICE_CELERY: "care-celery"
   ECS_CLUSTER: "ohn-dev"
@@ -142,12 +139,12 @@ jobs:
         env:
           ECR_REGISTRY: ghcr.io/${{ github.repository }}
           IMAGE_TAG: latest-${{ github.run_number }}
-        run: echo "IMAGE_VALUE=`echo ghcr.io/${{ github.repository }}:$IMAGE_TAG`" >> $GITHUB_ENV
+        run: echo "IMAGE_VALUE=ghcr.io/${{ github.repository }}:$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Fetch Celery Task Definition
         id: fetch-task-def-celery
         run: |
-          aws ecs describe-task-definition --task-definition care-celery --output json > celery-task-def.json
+          aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE_CELERY }} --output json > celery-task-def.json
 
       - name: Update Celery Task Definition
         id: update-task-def-celery
@@ -165,7 +162,7 @@ jobs:
       - name: Fetch Backend Task Definition
         id: fetch-task-def-backend
         run: |
-          aws ecs describe-task-definition --task-definition care --output json > backend-task-def.json
+          aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE_BACKEND }} --output json > backend-task-def.json
 
       - name: Update Backend Task Definition
         id: update-task-def-backend
