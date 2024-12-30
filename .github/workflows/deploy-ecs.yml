@@ -103,6 +103,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-build-
 
+      - name: Create new cache
+        run: |
+          mkdir -p /tmp/.buildx-cache
+          mkdir -p /tmp/.buildx-cache-new
+
       - name: Build and push image
         id: build-push
         uses: docker/build-push-action@v6
