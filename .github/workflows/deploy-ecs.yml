@@ -144,7 +144,7 @@ jobs:
 
   deploy-kerala-care-staging:
     needs: build
-    if: github.ref == 'refs/heads/vigneshhari/health-details'
+    if: github.ref == 'develop'
     name: Deploy to ECS API Staging
     runs-on: ubuntu-latest
     environment:
