@@ -1,4 +1,3 @@
-from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
@@ -14,14 +13,21 @@ from care.emr.api.viewsets.base import (
     EMRUpdateMixin,
     EMRUpsertMixin,
 )
+from care.emr.locks.billing import DeliveryOrderLock
 from care.emr.models.location import FacilityLocation
-from care.emr.models.supply_delivery import DeliveryOrder
+from care.emr.models.supply_delivery import DeliveryOrder, SupplyDelivery
+from care.emr.resources.inventory.supply_delivery.cancel_delivery_order import (
+    cancel_supply_deliveries,
+)
 from care.emr.resources.inventory.supply_delivery.delivery_order import (
     BaseSupplyDeliveryOrderSpec,
     SupplyDeliveryOrderReadSpec,
     SupplyDeliveryOrderRetrieveSpec,
     SupplyDeliveryOrderStatusOptions,
     SupplyDeliveryOrderWriteSpec,
+)
+from care.emr.resources.inventory.supply_delivery.spec import (
+    SupplyDeliveryStatusOptions,
 )
 from care.emr.resources.invoice.return_items_invoice import (
     cancel_return_invoice,
@@ -79,7 +85,7 @@ class DeliveryOrderViewSet(
             "can_list_facility_supply_delivery", self.request.user, location_obj
         ):
             if raise_error:
-                raise PermissionDenied("Cannot list supply requests")
+                raise PermissionDenied("Cannot list delivery orders")
             return False
         return True
 
@@ -88,7 +94,7 @@ class DeliveryOrderViewSet(
             "can_write_facility_supply_delivery", self.request.user, location_obj
         ):
             if raise_error:
-                raise PermissionDenied("Cannot write supply requests")
+                raise PermissionDenied("Cannot write delivery orders")
             return False
         return True
 
@@ -99,7 +105,7 @@ class DeliveryOrderViewSet(
             location_obj,
         ):
             if raise_error:
-                raise PermissionDenied("Cannot write supply requests")
+                raise PermissionDenied("Cannot write delivery orders")
             return False
         return True
 
@@ -121,11 +127,13 @@ class DeliveryOrderViewSet(
                 order.destination, raise_error=False
             )
         if not allowed:
-            raise PermissionDenied("Cannot write supply requests")
+            raise PermissionDenied("Cannot write delivery orders")
 
     def perform_update(self, instance):
-        with transaction.atomic():
-            old_instance = DeliveryOrder.objects.get(id=instance.id)
+        with DeliveryOrderLock([instance.pk]) as lock:
+            old_instance = lock.orders[instance.pk]
+            instance.patient_invoice_id = old_instance.patient_invoice_id
+            instance.updated_by = self.request.user
             if old_instance.status != instance.status:
                 if old_instance.status in [
                     SupplyDeliveryOrderStatusOptions.abandoned.value,
@@ -135,6 +143,18 @@ class DeliveryOrderViewSet(
                         "Delivery order already abandoned or entered in error"
                     )
                 if (
+                    old_instance.status
+                    == SupplyDeliveryOrderStatusOptions.completed.value
+                    and instance.status
+                    not in [
+                        SupplyDeliveryOrderStatusOptions.abandoned.value,
+                        SupplyDeliveryOrderStatusOptions.entered_in_error.value,
+                    ]
+                ):
+                    raise ValidationError(
+                        "Completed delivery order can only be cancelled"
+                    )
+                if (
                     instance.patient
                     and instance.status
                     == SupplyDeliveryOrderStatusOptions.abandoned.value
@@ -142,18 +162,36 @@ class DeliveryOrderViewSet(
                     raise ValidationError(
                         "Cannot abandon a delivery order with medication return"
                     )
-                if (
-                    instance.patient
-                    and instance.status
-                    == SupplyDeliveryOrderStatusOptions.completed.value
-                ):
-                    generate_return_invoice(instance)
+                if instance.status == SupplyDeliveryOrderStatusOptions.completed.value:
+                    if (
+                        SupplyDelivery.objects.filter(order=instance)
+                        .exclude(
+                            status__in=[
+                                SupplyDeliveryStatusOptions.completed.value,
+                                SupplyDeliveryStatusOptions.abandoned.value,
+                                SupplyDeliveryStatusOptions.entered_in_error.value,
+                            ]
+                        )
+                        .exists()
+                    ):
+                        raise ValidationError(
+                            "Finalise Deliveries before completing order"
+                        )
+                    if instance.patient:
+                        generate_return_invoice(instance)
                 if (
                     instance.patient
                     and instance.status
                     == SupplyDeliveryOrderStatusOptions.entered_in_error.value
                 ):
                     cancel_return_invoice(instance)
+                elif instance.status in [
+                    SupplyDeliveryOrderStatusOptions.abandoned.value,
+                    SupplyDeliveryOrderStatusOptions.entered_in_error.value,
+                ]:
+                    cancel_supply_deliveries(
+                        instance, instance.status, self.request.user
+                    )
 
             return super().perform_update(instance)
 
@@ -182,11 +220,20 @@ class DeliveryOrderViewSet(
         self.authorize_order_write(model_instance)
 
     def authorize_retrieve(self, model_instance):
-        allowed = False
-        if model_instance.origin:
-            allowed = allowed or self.authorize_location_read(model_instance.origin)
-        allowed = allowed or self.authorize_location_read(model_instance.destination)
-        if not allowed:
+        """
+        User should have read access to either origin or destination to read the order.
+        """
+        if not (
+            (
+                model_instance.origin
+                and self.authorize_location_read(
+                    model_instance.origin, raise_error=False
+                )
+            )
+            or self.authorize_location_read(
+                model_instance.destination, raise_error=False
+            )
+        ):
             raise PermissionDenied("Cannot read delivery orders")
 
     def get_location_obj(self, external_id):

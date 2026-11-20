@@ -8,6 +8,7 @@ from care.emr.reports.context_builder.data_points.base import (
     QuerysetContextBuilder,
     SingleObjectContextBuilder,
 )
+from care.emr.reports.context_builder.tag import TagFilter
 
 GENDER_CHOICES = {
     "male": "Male",
@@ -34,29 +35,33 @@ class IdentifierConfigContextBuilder(SingleObjectContextBuilder):
     display = Field(
         display="Display",
         preview_value="Patient ID",
-        mapping=lambda ic: ic.config.get("display")
-        if ic and ic.config and ic.config.get("display")
-        else None,
+        mapping=lambda ic: (
+            ic.config.get("display")
+            if ic and ic.config and ic.config.get("display")
+            else None
+        ),
         description="Display of the identifier configuration",
     )
 
     use = Field(
         display="Use",
         preview_value="Official",
-        mapping=lambda ic: IDENTIFIER_USE_OPTIONS.get(
-            ic.config.get("use"), ic.config.get("use").title()
-        )
-        if ic and ic.config and ic.config.get("use")
-        else None,
+        mapping=lambda ic: (
+            IDENTIFIER_USE_OPTIONS.get(
+                ic.config.get("use"), ic.config.get("use").title()
+            )
+            if ic and ic.config and ic.config.get("use")
+            else None
+        ),
         description="Use of the identifier configuration",
     )
 
     auto_maintained = Field(
         display="Auto Maintained",
         preview_value="False",
-        mapping=lambda ic: ic.config.get("auto_maintained", False)
-        if ic and ic.config
-        else None,
+        mapping=lambda ic: (
+            ic.config.get("auto_maintained", False) if ic and ic.config else None
+        ),
         description="Whether the identifier is auto maintained",
     )
 
@@ -90,11 +95,6 @@ class PatientTagContextBuilder(QuerysetContextBuilder):
     )
 
 
-class TagFilter(filters.FilterSet):
-    category = filters.CharFilter(field_name="category")
-    status = filters.CharFilter(field_name="status")
-
-
 class PatientInstanceTagsContextBuilder(PatientTagContextBuilder):
     filterset_class = TagFilter
     __filterset_backends__ = [filters.DjangoFilterBackend]
@@ -103,7 +103,17 @@ class PatientInstanceTagsContextBuilder(PatientTagContextBuilder):
         return TagConfig.objects.filter(id__in=self.parent_context.instance_tags)
 
 
-class BasePatientContextBuilder(SingleObjectContextBuilder):
+class PatientContextBuilder(SingleObjectContextBuilder):
+    standalone_context = True
+    __slug__ = "patient_base"
+    __associating_model__ = Patient
+    __display_name__ = "Patient Report"
+    __description__ = "Report context for patient-based reports"
+    context_key = "patient"
+
+    def get_context(self):
+        return getattr(self.parent_context, self.parent_attribute)
+
     name = Field(
         display="Patient Name",
         preview_value="John Doe",
@@ -113,9 +123,9 @@ class BasePatientContextBuilder(SingleObjectContextBuilder):
     gender = Field(
         display="Patient Gender",
         preview_value="Male",
-        mapping=lambda p: GENDER_CHOICES.get(p.gender, p.gender.title())
-        if p.gender
-        else "",
+        mapping=lambda p: (
+            GENDER_CHOICES.get(p.gender, p.gender.title()) if p.gender else ""
+        ),
         description="Gender of the patient",
     )
     age = Field(
@@ -128,9 +138,9 @@ class BasePatientContextBuilder(SingleObjectContextBuilder):
     blood_group = Field(
         display="Patient Blood Group",
         preview_value="A Positive",
-        mapping=lambda p: p.blood_group.replace("_", " ").title()
-        if p.blood_group
-        else "",
+        mapping=lambda p: (
+            p.blood_group.replace("_", " ").title() if p.blood_group else ""
+        ),
         description="Blood group of the patient",
     )
 
@@ -181,18 +191,4 @@ class BasePatientContextBuilder(SingleObjectContextBuilder):
     )
 
 
-class PatientMinimumContextBuilder(BasePatientContextBuilder):
-    def get_context(self):
-        return getattr(self.parent_context, self.parent_attribute)
-
-
-class PatientContextBuilderBase(BasePatientContextBuilder):
-    standalone_context = True
-    __slug__ = "patient_base"
-    __associating_model__ = Patient
-    __display_name__ = "Patient Report"
-    __description__ = "Report context for patient-based reports"
-    context_key = "patient"
-
-
-DataPointRegistry.register(PatientContextBuilderBase)
+DataPointRegistry.register(PatientContextBuilder)

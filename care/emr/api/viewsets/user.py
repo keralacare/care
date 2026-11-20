@@ -29,6 +29,7 @@ from care.emr.resources.user.spec import (
 from care.emr.utils.reset_password import send_password_reset_email
 from care.security.authorization import AuthorizationController
 from care.security.models import RoleModel
+from care.users.locks import lock_user_auth
 from care.users.models import User
 from care.utils.file_uploads.cover_image import delete_cover_image, upload_cover_image
 from care.utils.filters.default_filter import DefaultBooleanFilter
@@ -105,6 +106,11 @@ class UserViewSet(EMRModelViewSet):
     def get_queryset(self):
         return super().get_queryset().filter(deleted=False)
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        with lock_user_auth(instance.external_id):
+            return super().update(request, *args, **kwargs)
+
     def perform_create(self, instance):
         with transaction.atomic():
             super().perform_create(instance)
@@ -134,7 +140,7 @@ class UserViewSet(EMRModelViewSet):
                     user=instance,
                     role=requested_role,
                 )
-            if not instance.has_usable_password():
+            if not instance.is_service_account and not instance.has_usable_password():
                 try:
                     mail_type = MailTypeChoices.create.value
                     send_password_reset_email(instance, mail_type)

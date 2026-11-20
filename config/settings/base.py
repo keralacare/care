@@ -115,7 +115,7 @@ DJANGO_APPS = [
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.admin",
+    "config.apps.CareAdminConfig",
     "django.forms",
 ]
 THIRD_PARTY_APPS = [
@@ -409,6 +409,7 @@ SIMPLE_JWT = {
     ),
     "ROTATE_REFRESH_TOKENS": True,
     "USER_ID_FIELD": "external_id",
+    "CHECK_REVOKE_TOKEN": True,
 }
 
 # Celery (background tasks)
@@ -502,9 +503,31 @@ AUDIT_LOG = {
 
 # OTP
 # ------------------------------------------------------------------------------
-OTP_REPEAT_WINDOW = 6  # OTPs will only be valid for 6 hours to login
-OTP_MAX_REPEATS_WINDOW = 10  # times OTPs can be sent within OTP_REPEAT_WINDOW
 OTP_LENGTH = 5
+
+# The time window (in minutes) for tracking OTP request limits
+OTP_SEND_WINDOW_MINUTES = env.int("OTP_SEND_WINDOW_MINUTES", default=60)
+
+# Maximum number of OTPs that can be generated within the window defined above
+OTP_MAX_SENDS_PER_WINDOW = env.int("OTP_MAX_SENDS_PER_WINDOW", default=10)
+
+# Number of failed verification attempts allowed before an OTP is invalidated
+OTP_MAX_VERIFY_ATTEMPTS = env.int("OTP_MAX_VERIFY_ATTEMPTS", default=3)
+
+# Maximum total failures allowed before the phone number is restricted
+OTP_MAX_FAILURES = env.int("OTP_MAX_FAILURES", default=5)
+
+# Duration (in minutes) the account remains locked after reaching maximum failures
+OTP_LOCKOUT_MINUTES = env.int("OTP_LOCKOUT_MINUTES", default=60)
+
+# Duration (in minutes) an OTP remains valid for verification after it is generated
+OTP_VALIDITY_MINUTES = env.int("OTP_VALIDITY_MINUTES", default=10)
+
+# Duration (in hours) an OTP stays valid for the password reset flow
+OTP_REPEAT_WINDOW = env.int("OTP_REPEAT_WINDOW", default=6)
+
+# Maximum number of OTPs that can be sent within OTP_REPEAT_WINDOW (password reset flow)
+OTP_MAX_REPEATS_WINDOW = env.int("OTP_MAX_REPEATS_WINDOW", default=10)
 
 # Rate Limiting
 # ------------------------------------------------------------------------------
@@ -672,6 +695,30 @@ FACILITY_S3_BUCKET_EXTERNAL_ENDPOINT = env(
 )
 FACILITY_CDN = env("FACILITY_CDN", default=None)
 
+# REPORT RENDERING
+# ------------------------------------------------------------------------------
+REPORT_MAX_RESOURCE_SIZE_BYTES = env.int(
+    "REPORT_MAX_RESOURCE_SIZE_BYTES", default=10 * 1024 * 1024
+)
+REPORT_ALLOWED_RESOURCE_ORIGINS = env.list(
+    "REPORT_ALLOWED_RESOURCE_ORIGINS",
+    default=env.list(
+        "REPORT_ALLOWED_IMAGE_ORIGINS", default=[FACILITY_CDN] if FACILITY_CDN else []
+    ),
+)
+REPORT_CONTENT_SECURITY_POLICY = env(
+    "REPORT_CONTENT_SECURITY_POLICY",
+    default=(
+        "default-src 'none'; img-src "
+        + " ".join(["data:", *REPORT_ALLOWED_RESOURCE_ORIGINS])
+        + "; font-src "
+        + " ".join(["data:", *REPORT_ALLOWED_RESOURCE_ORIGINS])
+        + "; style-src "
+        + " ".join(["'unsafe-inline'", *REPORT_ALLOWED_RESOURCE_ORIGINS])
+        + "; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    ),
+)
+
 # current hosted domain
 CURRENT_DOMAIN = env("CURRENT_DOMAIN", default="localhost:4000")
 BACKEND_DOMAIN = env("BACKEND_DOMAIN", default="localhost:9000")
@@ -718,3 +765,9 @@ TOTP_DISABLED_EMAIL_TEMPLATE_PATH = env(
 
 # Cleanup incomplete file uploads, set to 0 to disable
 FILE_UPLOAD_EXPIRY_HOURS = env.int("FILE_UPLOAD_EXPIRY_HOURS", default=24)
+
+# Prometheus Metrics
+
+ENABLE_PROMETHEUS_METRICS = env.bool("ENABLE_PROMETHEUS_METRICS", default=True)
+# Seconds to cache the collected metrics; set to 0 to collect on every scrape.
+PROMETHEUS_METRICS_CACHE_TTL = env.int("PROMETHEUS_METRICS_CACHE_TTL", default=600)

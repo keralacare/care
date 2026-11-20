@@ -8,6 +8,7 @@ from care.emr.reports.context_builder.data_point_registry import DataPointRegist
 from care.emr.reports.context_builder.data_points.allergy_intolerance import (
     AllergyIntoleranceContextBuilder,
 )
+from care.emr.reports.context_builder.data_points.audit import AuditContextMixin
 from care.emr.reports.context_builder.data_points.base import (
     Field,
     QuerysetContextBuilder,
@@ -25,9 +26,8 @@ from care.emr.reports.context_builder.data_points.medication import (
 )
 from care.emr.reports.context_builder.data_points.patient import (
     IdentifiersContextBuilder,
-    PatientMinimumContextBuilder,
+    PatientContextBuilder,
     PatientTagContextBuilder,
-    TagFilter,
 )
 from care.emr.reports.context_builder.data_points.questionnaire import (
     QuestionnaireContextBuilder,
@@ -37,6 +37,7 @@ from care.emr.reports.context_builder.data_points.service_request import (
 )
 from care.emr.reports.context_builder.data_points.symptom import SymptomsContextBuilder
 from care.emr.reports.context_builder.data_points.user import SingleUserIdContextBuilder
+from care.emr.reports.context_builder.tag import QuerysetTagContextBuilder, TagFilter
 
 STATUS_DISPLAY = {
     "planned": "Planned",
@@ -110,14 +111,6 @@ class EncounterPatientFacilityTagContextBuilder(PatientTagContextBuilder):
                 str(self.parent_context.facility.id), []
             )
         )
-
-
-class EncounterTagContextBuilder(PatientTagContextBuilder):
-    filterset_class = TagFilter
-    __filterset_backends__ = [filters.DjangoFilterBackend]
-
-    def get_context(self):
-        return TagConfig.objects.filter(id__in=self.parent_context.tags or [])
 
 
 class EncounterFacilityLocationContextBuilder(SingleObjectContextBuilder):
@@ -226,7 +219,24 @@ class EncounterHospitalizationContextBuilder(SingleObjectContextBuilder):
     )
 
 
-class BaseEncounterReportContext(SingleObjectContextBuilder):
+class PatientFacilityIdentifiersContextBuilder(IdentifiersContextBuilder):
+    def get_context(self):
+        return self.parent_context.patient.facility_identifiers.get(
+            str(self.parent_context.facility.id), []
+        )
+
+
+class EncounterReportContext(AuditContextMixin, SingleObjectContextBuilder):
+    standalone_context = True
+    __slug__ = "encounter_base"
+    __associating_model__ = Encounter
+    __display_name__ = "Encounter Report"
+    __description__ = "Report context for encounter-based reports"
+    context_key = "encounter"
+
+    def get_context(self):
+        return getattr(self.parent_context, self.parent_attribute)
+
     status = Field(
         display="Encounter Status",
         mapping=lambda e: STATUS_DISPLAY.get(
@@ -284,14 +294,8 @@ class BaseEncounterReportContext(SingleObjectContextBuilder):
         preview_value="Patient is advised to follow up in 2 weeks.",
         description="Discharge summary advice for the encounter",
     )
-    patient_facility_tags = Field(
-        target_context=EncounterPatientFacilityTagContextBuilder,
-        display="Patient Facility Tags",
-        preview_value="",
-        description="Facility-specific tags associated with the patient for the encounter",
-    )
     encounter_tags = Field(
-        target_context=EncounterTagContextBuilder,
+        target_context=QuerysetTagContextBuilder,
         display="Encounter Tags",
         preview_value="",
         description="Tags associated with the encounter",
@@ -327,30 +331,9 @@ class BaseEncounterReportContext(SingleObjectContextBuilder):
         description="Encounter extensions as JSON (e.g. encounter.extensions.encounter_attender)",
     )
 
-
-class MinimumEncounterReportContext(BaseEncounterReportContext):
-    def get_context(self):
-        return getattr(self.parent_context, self.parent_attribute)
-
-
-class PatientFacilityIdentifiersContextBuilder(IdentifiersContextBuilder):
-    def get_context(self):
-        return self.parent_context.patient.facility_identifiers.get(
-            str(self.parent_context.facility.id), []
-        )
-
-
-class EncounterReportContext(BaseEncounterReportContext):
-    standalone_context = True
-    __slug__ = "encounter_base"
-    __associating_model__ = Encounter
-    __display_name__ = "Encounter Report"
-    __description__ = "Report context for encounter-based reports"
-    context_key = "encounter"
-
     patient = Field(
         display="Patient Details",
-        target_context=PatientMinimumContextBuilder,
+        target_context=PatientContextBuilder,
         preview_value="",
         description="Details of the patient associated with the encounter",
     )
@@ -413,6 +396,12 @@ class EncounterReportContext(BaseEncounterReportContext):
         target_context=PatientFacilityIdentifiersContextBuilder,
         preview_value="",
         description="Facility identifiers associated with the encounter",
+    )
+    patient_facility_tags = Field(
+        target_context=EncounterPatientFacilityTagContextBuilder,
+        display="Patient Facility Tags",
+        preview_value="",
+        description="Facility-specific tags associated with the patient for the encounter",
     )
 
 

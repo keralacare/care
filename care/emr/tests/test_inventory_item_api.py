@@ -1,3 +1,5 @@
+import datetime
+
 from django.urls import reverse
 from model_bakery import baker
 
@@ -131,6 +133,26 @@ class InventoryItemAPITest(CareAPITestBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["id"], str(inventory_item.external_id))
 
+    def test_retrieve_inventory_item_with_invalid_location(self):
+        self.client.force_authenticate(user=self.super_user)
+        other_location = self.create_facility_location(facility=self.facility)
+        inventory_item = self.create_inventory_item(
+            facility=self.facility, location=self.facility_location
+        )
+        response = self.client.get(
+            self.get_detail_url(
+                facility=self.facility.external_id,
+                location=other_location.external_id,
+                external_id=inventory_item.external_id,
+            )
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(
+            response,
+            "Inventory item does not belong to the specified location",
+            status_code=400,
+        )
+
     def test_retrieve_inventory_item_as_user_without_permission(self):
         self.client.force_authenticate(user=self.user)
         inventory_item = self.create_inventory_item(
@@ -179,6 +201,29 @@ class InventoryItemAPITest(CareAPITestBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["id"], str(inventory.external_id))
+
+    def test_listing_inventory_items_product_expiration_date_filter(self):
+        self.client.force_authenticate(user=self.super_user)
+        now = datetime.datetime.now(datetime.UTC)
+        unexpired_inventory = self.create_inventory_item(
+            facility=self.facility,
+            location=self.facility_location,
+            expiration_date=now + datetime.timedelta(days=30),
+        )
+        self.create_inventory_item(
+            facility=self.facility,
+            location=self.facility_location,
+            expiration_date=now - datetime.timedelta(days=30),
+        )
+        response = self.client.get(
+            self.base_url,
+            {"product_expiration_date_after": now.date().isoformat()},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(
+            response.data["results"][0]["id"], str(unexpired_inventory.external_id)
+        )
 
     def test_listing_inventory_items_include_children_filter(self):
         self.client.force_authenticate(user=self.super_user)
